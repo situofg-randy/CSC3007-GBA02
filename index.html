@@ -52,9 +52,25 @@
     <script>
 
     // Load external data
-    Promise.all([d3.json("https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/situofg-randy/CSC3007-GBA02/main/country.json?token=GHSAT0AAAAAABWXAABQA4TIN4R5FMW6J4JSYXGCPCQ"), d3.csv("https://raw.githubusercontent.com/Chi-Loong/CSC3007/main/assignments/population2021.csv")]).then(data => {
+    Promise.all([d3.json("https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/situofg-randy/CSC3007-GBA02/main/country.json?token=GHSAT0AAAAAABWXAABQA4TIN4R5FMW6J4JSYXGCPCQ"), d3.csv("https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/situofg-randy/CSC3007-GBA02/main/export.csv?token=GHSAT0AAAAAABWXAABQ2DUVBBVRD436AY6GYXGCTLQ")]).then(data => {
 
         let locations_json = data[0]
+        let locations_csv = data[1]
+
+        for (const x in locations_json["features"]) {
+
+            for (const y in locations_csv) {
+                if (locations_csv[y]["country"] !== undefined) {
+                    if (locations_json["features"][x]["properties"]["Name"].toLowerCase() === locations_csv[y]["Subzone"].toLowerCase()) {
+                        if (locations_csv[y]["value"] === "-") {
+                            locations_json["features"][x]["properties"]["value"] = 0  
+                        } else {
+                            locations_json["features"][x]["properties"]["value"] = locations_csv[y]["Population"]
+                        }
+                    }
+                }
+            }
+        }
                 
         console.log(locations_json);
         
