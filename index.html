@@ -52,7 +52,7 @@
     <script>
 
     // Load external data
-    Promise.all([d3.json("https://cors-anywhere.herokuapp.com/https://github.com/situofg-randy/CSC3007-assignment3/blob/main/country.json"), d3.csv("https://raw.githubusercontent.com/Chi-Loong/CSC3007/main/assignments/population2021.csv")]).then(data => {
+    Promise.all([d3.json("https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/situofg-randy/CSC3007-GBA02/main/country.json?token=GHSAT0AAAAAABWXAABQA4TIN4R5FMW6J4JSYXGCPCQ"), d3.csv("https://raw.githubusercontent.com/Chi-Loong/CSC3007/main/assignments/population2021.csv")]).then(data => {
 
         let locations_json = data[0]
                 
