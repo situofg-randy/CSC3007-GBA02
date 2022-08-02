@@ -43,17 +43,12 @@
         </style>
     </head>
     <body>
-    
-
+    <div id="map"></div>
+   
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
-    <link href="nouislider.css" rel="stylesheet">
-    <script src="nouislider.js"></script>
+    
 
-    
-    <div id="map"></div>
-    <div id="slider" class="leaflet-container"></div>
-    
     <script>
 
     // Load external data
@@ -73,28 +68,19 @@
                 }
             } else {
                 r[country] = { country };
-                r[country]["data"] = {}
                 r[country]["data"][year] = { value }
             }
             return r;
         }, Object.create(null)));
 
     for (const x in locations_json["features"]) {
-        for (const y in result) {
-            if (result[y]["country"] !== undefined) {
-                if (locations_json["features"][x]["properties"]["ADMIN"].toLowerCase().includes(result[y]["country"].toLowerCase()) || result[y]["country"].toLowerCase().includes(locations_json["features"][x]["properties"]["ADMIN"].toLowerCase())) {
-                    if (result[y]["data"] === {}) {
-                        locations_json["features"][x]["properties"]["data"] = {}
+        for (const y in export_json) {
+            if (export_json[y]["country"] !== undefined) {
+                if (locations_json["features"][x]["properties"]["ADMIN"].toLowerCase().includes(export_json[y]["country"].toLowerCase())) {
+                    if (export_json[y]["value"] === "-") {
+                        locations_json["features"][x]["properties"]["value"] = 0  
                     } else {
-                        locations_json["features"][x]["properties"]["data"] = result[y]["data"]
-                    }
-                    for(i=2010; i<2019; i++) {
-                        if (locations_json["features"][x]["properties"]["data"][i] == undefined) {
-                            locations_json["features"][x]["properties"]["data"][i] = 0  
-                        }
-                    }
-                    if (locations_json["features"][x]["properties"]["data"]["2018"] == undefined) {
-                        locations_json["features"][x]["properties"]["data"]["2018"] = 0  
+                        locations_json["features"][x]["properties"]["value"] = export_json[y]
                     }
                 }
             }
@@ -102,7 +88,6 @@
     }
                 
         console.log(result);
-        console.log(locations_json)
         
 
 	var map = L.map('map').setView([1.3258, 103.7587], 12);
@@ -120,48 +105,35 @@
         this.update();
         return this._div;
     };
-    
+
     info.update = function (props) {
-        this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
-            '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"]["2010"]["value"]).toString() + ' m' : 'Hover over a country');
+        this._div.innerHTML = '<h4>Singapore Population Density</h4>' +  (props ?
+            '<b>' + props["country"] + '</b><br />' + props["2018"] + ' people / mi<sup>2</sup>' : 'Hover over a state');
     };
 
     info.addTo(map);
 
-    var sliderYear = 2010;
+
     // get color depending on population density value
     function getColor(d) {
-        return d > 10000 ? '#800026' :
-            d > 5000 ? '#BD0026' :
-            d > 4000  ? '#E31A1C' :
-            d > 3000  ? '#FC4E2A' :
-            d > 2000  ? '#FD8D3C' :
+        return d > 100000 ? '#800026' :
+            d > 50000 ? '#BD0026' :
+            d > 20000  ? '#E31A1C' :
+            d > 10000  ? '#FC4E2A' :
+            d > 5000  ? '#FD8D3C' :
             d > 1000  ? '#FEB24C' :
             d > 100   ? '#FED976' : '#FFEDA0';
     }
 
     function style(feature) {
-        if (feature.properties.data !== undefined) {
-                if (feature.properties.data[sliderYear] !== undefined) {
-                    return {
-                        weight: 2,
-                        opacity: 1,
-                        color: 'white',
-                        dashArray: '3',
-                        fillOpacity: 0.7,
-                        fillColor: getColor(feature.properties.data[sliderYear]["value"])
-                    };
-            }
-        } else {
-            return {
-                weight: 2,
-                opacity: 1,
-                color: 'white',
-                dashArray: '3',
-                fillOpacity: 0.7,
-                fillColor: getColor(0)
-            }
-        }
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7,
+            fillColor: getColor(feature)
+        };
     }
 
     function highlightFeature(e) {
@@ -205,50 +177,8 @@
         style: style,
         onEachFeature: onEachFeature
     }).addTo(map);
-    
-    console.log(geojson.properties)
 
-    var valuesSlider = document.getElementById('slider');
-    var valuesForSlider = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018];  
-
-    var format = {
-        to: function(value) {
-            return valuesForSlider[Math.round(value)];
-        },
-        from: function (value) {
-            return valuesForSlider.indexOf(Number(value));
-        }
-    };
-
-    noUiSlider.create(valuesSlider, {
-        start: [2010],
-        range: { min: 0, max: valuesForSlider.length - 1 },
-        step: 1,
-        tooltips: true,
-        format: format,
-        pips: { mode: 'steps', format: format },
-    }).on('slide', function(e) {
-        console.log(e)
-        sliderYear = e[0]
-        map.removeLayer(geojson);
-
-        geojson = L.geoJson(locations_json, {
-            style: style,
-            onEachFeature: onEachFeature
-        }).addTo(map);
-
-        info.update = function (props) {
-        this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
-            '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"][e[0]]["value"]).toString() + ' m' : 'Hover over a country');
-        };
-    });
-
-    valuesSlider.noUiSlider.set(['2010', '2018']);
-    
-    
-
-
-    map.attributionControl.addAttribution('Export data &copy; All countries');
+    map.attributionControl.addAttribution('Population data &copy; Singapore Population');
 
 
     var legend = L.control({position: 'bottomright'});
@@ -256,7 +186,7 @@
     legend.onAdd = function (map) {
 
         var div = L.DomUtil.create('div', 'info legend');
-        var grades = [0, 100, 1000, 2000, 3000, 4000, 5000, 10000];
+        var grades = [0, 100, 1000, 5000, 10000, 20000, 50000, 100000];
         var labels = [];
         var from, to;
 
