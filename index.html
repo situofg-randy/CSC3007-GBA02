@@ -81,8 +81,11 @@
 
         var sliderYear = 2010;
 
+        // Initial data cleaning
+        // const wordsToExclude = new Set(['OR', 'AND']);
+
         for(const i in export_json) {
-            export_json[i]["Commodity"].split(' ').slice(0,2).join(' ')
+            export_json[i]["Commodity"] = export_json[i]["Commodity"].replace(/\W/g, ' ').split(' ').slice(0,2).join(' ')
         }
 
         let result = Object.values(export_json.reduce(function (r, { country, value, year }) {
