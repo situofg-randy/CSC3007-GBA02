@@ -81,6 +81,10 @@
 
         var sliderYear = 2010;
 
+        for(const i in export_json) {
+            export_json[i]["Commodity"].split(' ').slice(0,2).join(' ')
+        }
+
         let result = Object.values(export_json.reduce(function (r, { country, value, year }) {
             country = country.toLowerCase() || 'unknown';
             if (r[country]) {
