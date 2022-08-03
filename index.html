@@ -105,7 +105,7 @@
         console.log(locations_json)
         
 
-	var map = L.map('map').setView([1.3258, 103.7587], 12);
+	var map = L.map('map').setView([1.3258, 70.7587], 3);
 
     var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -122,8 +122,14 @@
     };
     
     info.update = function (props) {
-        this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
+        try {
+            this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
             '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"]["2010"]["value"]).toString() + ' m' : 'Hover over a country');
+        } catch {
+            this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
+            '<b>' + props["ADMIN"] + '</b><br />' + ' No data' : 'Hover over a country');
+        }
+        
     };
 
     info.addTo(map);
@@ -137,7 +143,7 @@
             d > 3000  ? '#FC4E2A' :
             d > 2000  ? '#FD8D3C' :
             d > 1000  ? '#FEB24C' :
-            d > 100   ? '#FED976' : '#FFEDA0';
+            d > 1   ? '#FED976' : '#EEEEEE';
     }
 
     function style(feature) {
@@ -238,8 +244,13 @@
         }).addTo(map);
 
         info.update = function (props) {
-        this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
-            '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"][e[0]]["value"]).toString() + ' m' : 'Hover over a country');
+            try {
+            this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
+            '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"]["2010"]["value"]).toString() + ' m' : 'Hover over a country');
+        } catch {
+            this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
+            '<b>' + props["ADMIN"] + '</b><br />' + ' No data' : 'Hover over a country');
+        }
         };
     });
 
@@ -256,7 +267,7 @@
     legend.onAdd = function (map) {
 
         var div = L.DomUtil.create('div', 'info legend');
-        var grades = [0, 100, 1000, 2000, 3000, 4000, 5000, 10000];
+        var grades = [1, 100, 1000, 2000, 3000, 4000, 5000, 10000];
         var labels = [];
         var from, to;
 
