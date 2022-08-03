@@ -54,6 +54,7 @@
     <div id="map"></div>
     <div id="slider" class="leaflet-container"></div>
     <div id="export_barchart"></div>
+    <div id="export10_barchart"></div>
     
     <script>
 
@@ -62,6 +63,8 @@
 
         let locations_json = data[0]
         let export_json = data[1]
+
+        var sliderYear = 2010;
 
         let result = Object.values(export_json.reduce(function (r, { country, value, year }) {
             country = country.toLowerCase() || 'unknown';
@@ -101,6 +104,8 @@
             }
         }
     }
+
+    
                 
         console.log(result);
         console.log(locations_json)
@@ -159,6 +164,50 @@
             .attr("fill", "#69b3a2")    
     }
 
+    function generateCountryTop10Graph() {
+        countryYearlyBarChart.selectAll("rect").remove()
+        countryYearlyBarChart.selectAll("g").remove()
+        countryYearlyBarChart.selectAll("text").remove()
+
+        var x1 = d3.scaleLinear()
+            .domain([0, Math.max.apply(Math, selectedCountryTop10.map(function(o) { return o.value; }))])
+            .range([ 0, width]);
+            countryYearlyBarChart.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x1))
+            .selectAll("text")
+            .attr("transform", "translate(-10,0)rotate(-45)")
+            .style("text-anchor", "end");
+
+        // Y axis
+        var y1 = d3.scaleBand()
+            .range([ 0, height ])
+            .domain(
+                function(d) {
+                    return d["Commodity"]
+                }
+            )
+            .padding(.1);
+        countryYearlyBarChart.append("g")
+            .call(d3.axisLeft(y1))
+
+        //Bars
+        countryYearlyBarChart.selectAll("myRect")
+            .data(selectedCountryData)
+            .enter()
+            .append("rect")
+            .attr("x", x1(0) )
+            .attr("y", function(d) {
+                return y1(d.Commodity)
+            })
+            .attr("width", function(d) {
+                return x1(d.value)
+            })
+            .attr("height", y1.bandwidth() )
+            .attr("fill", "#69b3a2")    
+    }
+    
+
     var selectedCountryData = []
     var selectedCountry = "";
 
@@ -179,22 +228,17 @@
 
     }
 
-    function generateCountryExportData(selectedCountry) {
-        var country = locations_json.features.filter(item => item["properties"]["ADMIN"].indexOf(selectedCountry) !== -1)
-        var keys = Object.keys(country[0]["properties"]["data"])
-        selectedCountryData = []
-
-        for (const i in country[0]["properties"]["data"]) {
-            var temp_val = country[0]["properties"]["data"][i]["value"]
-            var temp_country = country[0]["properties"]["ADMIN"]
-            var temp_object = {}
-            temp_object["country"] = temp_country
-            temp_object["value"] = temp_val
-            temp_object["year"] = i
-            selectedCountryData.push(temp_object)
-        }
-
+    function generateCountryTop10Data(selectedCountry, selectedYear) {
+        selectedCountryTop10 = export_json.filter(item => item["country"].toLowerCase().indexOf(selectedCountry.toLowerCase()) !== -1)
+        selectedCountryTop10 = selectedCountryTop10.filter(item => item["year"] == selectedYear !== -1)
+        selectedCountryTop10 = selectedCountryTop10
+        .sort((a, b) => parseFloat(b.value) - parseFloat(a.value))
+        .filter(obj => obj.value != null)
+        .slice(0, 10)
     }
+
+   generateCountryTop10Data("China", sliderYear)
+   console.log(selectedCountryTop10)
     
         // console.log(locations_json.features.filter(item => item["properties"]["ADMIN"].indexOf("China") !== -1))
         
@@ -228,7 +272,6 @@
 
     info.addTo(map);
 
-    var sliderYear = 2010;
     // get color depending on population density value
     function getColor(d) {
         return d > 10000 ? '#800026' :
@@ -346,7 +389,7 @@
         info.update = function (props) {
             try {
             this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
-            '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"]["2010"]["value"]).toString() + ' m' : 'Hover over a country');
+            '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"][sliderYear]["value"]).toString() + ' m' : 'Hover over a country');
         } catch {
             this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
             '<b>' + props["ADMIN"] + '</b><br />' + ' No data' : 'Hover over a country');
