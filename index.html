@@ -306,7 +306,7 @@
     info.update = function (props) {
         try {
             this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
-            '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"]["2010"]["value"]).toString() + ' m' : 'Hover over a country');
+            '<b>' + props["ADMIN"] + '</b><br />' + parseInt(props["data"]["2010"]["value"]).toString() + ' million' : 'Hover over a country');
         } catch {
             this._div.innerHTML = '<h4>India Export Data</h4>' +  (props ?
             '<b>' + props["ADMIN"] + '</b><br />' + ' No data' : 'Hover over a country');
