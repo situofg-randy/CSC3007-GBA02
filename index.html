@@ -67,6 +67,9 @@
     <div id="slider" class="leaflet-container"></div>
     </div>
     <div id="block_container">
+        <h4 id="labelYear">2010</h4>
+    </div>
+    <div id="block_container">
         <div id="export_barchart" id="block1"></div>
         <div id="export10_barchart" id="block2"></div>
     </div>
@@ -74,7 +77,7 @@
     <script>
 
     // Load external data
-    Promise.all([d3.json("https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/situofg-randy/CSC3007-GBA02/main/country.json"), d3.json("https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/situofg-randy/CSC3007-GBA02/main/export.json")]).then(data => {
+    Promise.all([d3.json("https://raw.githubusercontent.com/situofg-randy/CSC3007-GBA02/main/country.json"), d3.json("https://raw.githubusercontent.com/situofg-randy/CSC3007-GBA02/main/export.json")]).then(data => {
 
         let locations_json = data[0]
         let export_json = data[1]
@@ -85,7 +88,7 @@
         // const wordsToExclude = new Set(['OR', 'AND']);
 
         for(const i in export_json) {
-            export_json[i]["Commodity"] = export_json[i]["Commodity"].replace(/\W/g, ' ').split(' ').slice(0,2).join(' ')
+            export_json[i]["Commodity"] = export_json[i]["Commodity"].replace(/\W/g, ' ').split(' ').slice(0,3).join(' ')
         }
 
         let result = Object.values(export_json.reduce(function (r, { country, value, year }) {
@@ -163,7 +166,7 @@
         var y1 = d3.scaleBand()
             .range([ 0, height ])
             .domain(
-                Object.keys(locations_json.features.filter(item => item["properties"]["ADMIN"].indexOf("China") !== -1)[0]["properties"]["data"])
+                Object.keys(locations_json.features.filter(item => item["properties"]["ADMIN"].indexOf(selectedCountry) !== -1)[0]["properties"]["data"])
             )
             .padding(.1);
         countryYearlyBarChart.append("g") 
@@ -424,6 +427,7 @@
         sliderYear = e[0]
         map.removeLayer(geojson);
 
+
         geojson = L.geoJson(locations_json, {
             style: style,
             onEachFeature: onEachFeature
@@ -438,7 +442,8 @@
             '<b>' + props["ADMIN"] + '</b><br />' + ' No data' : 'Hover over a country');
         }
         };
-
+        var labelYear = document.getElementById("labelYear")
+        labelYear.innerHTML = sliderYear.toString()
         generateCountryTop10Data(selectedCountry, sliderYear)
         generateCountryTop10Graph()
         console.log(selectedCountryTop10)
